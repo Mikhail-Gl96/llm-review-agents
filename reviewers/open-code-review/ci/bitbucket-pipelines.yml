@@ -12,6 +12,7 @@ pipelines:
             - ocr config set llm.auth_token "$DEEPSEEK_KEY"
             - ocr config set llm.model deepseek-v4-pro
             - ocr config set llm.use_anthropic false
-            - ocr review --from "origin/$BITBUCKET_PR_DESTINATION_BRANCH" --to "$BITBUCKET_COMMIT" --audience agent | tee review.md
+            - ocr review --from "origin/$BITBUCKET_PR_DESTINATION_BRANCH" --to "$BITBUCKET_COMMIT" --format json > review.json
+            - python3 .github/scripts/ocr-json-to-markdown.py review.json > review.md
           artifacts:
             - review.md

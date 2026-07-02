@@ -204,11 +204,33 @@ def render(data: dict, base_url: str = "") -> str:
 
 def main() -> None:
     if len(sys.argv) > 1:
-        raw = Path(sys.argv[1]).read_text(encoding="utf-8")
+        path = Path(sys.argv[1])
+        if not path.exists():
+            print(f"✗ Файл не найден: {path}", file=sys.stderr)
+            sys.exit(1)
+        if path.stat().st_size == 0:
+            print(f"✗ Файл пуст: {path}", file=sys.stderr)
+            sys.exit(1)
+        raw = path.read_text(encoding="utf-8")
     else:
         raw = sys.stdin.read()
 
-    data = json.loads(raw)
+    raw = raw.strip()
+    if not raw:
+        if len(sys.argv) > 1:
+            print(f"✗ Файл содержит только пробельные символы: {path}", file=sys.stderr)
+        else:
+            print("✗ JSON-ввод пуст — ocr не вернул данных.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        preview = raw[:200] if len(raw) > 200 else raw
+        print(f"✗ Ошибка парсинга JSON: {e}", file=sys.stderr)
+        print(f"  Содержимое (первые 200 байт): {preview}", file=sys.stderr)
+        sys.exit(1)
+
     base_url = sys.argv[2] if len(sys.argv) > 2 else ""
     print(render(data, base_url))
 

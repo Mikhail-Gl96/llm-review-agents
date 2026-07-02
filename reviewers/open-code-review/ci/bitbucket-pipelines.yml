@@ -1,0 +1,17 @@
+# Авто AI-ревью через ocr в Bitbucket Pipelines. Repository variables (secured): DEEPSEEK_KEY.
+# Коммент в PR — опционально через Bitbucket REST API + app password (см. ci.md).
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: open-code-review
+          image: node:20
+          script:
+            - npm install -g @alibaba-group/open-code-review
+            - ocr config set llm.url https://api.deepseek.com/chat/completions
+            - ocr config set llm.auth_token "$DEEPSEEK_KEY"
+            - ocr config set llm.model deepseek-chat
+            - ocr config set llm.use_anthropic false
+            - ocr review --from "origin/$BITBUCKET_PR_DESTINATION_BRANCH" --to "$BITBUCKET_COMMIT" --audience agent | tee review.md
+          artifacts:
+            - review.md

@@ -1,0 +1,8 @@
+{
+  "llm": {
+    "url": "https://api.deepseek.com/chat/completions",
+    "auth_token": "ВСТАВЬ_СЮДА_DEEPSEEK_KEY",
+    "model": "deepseek-chat",
+    "use_anthropic": false
+  }
+}

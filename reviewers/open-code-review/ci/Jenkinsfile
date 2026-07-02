@@ -1,0 +1,18 @@
+// Авто AI-ревью через ocr на Jenkins. Credentials (Secret text): DEEPSEEK_KEY.
+pipeline {
+  agent { docker { image 'node:20' } }
+  environment { DEEPSEEK_KEY = credentials('DEEPSEEK_KEY') }
+  stages {
+    stage('open-code-review') {
+      steps {
+        sh 'npm install -g @alibaba-group/open-code-review'
+        sh 'ocr config set llm.url https://api.deepseek.com/chat/completions'
+        sh 'ocr config set llm.auth_token "$DEEPSEEK_KEY"'
+        sh 'ocr config set llm.model deepseek-chat'
+        sh 'ocr config set llm.use_anthropic false'
+        sh 'ocr review --from "origin/$CHANGE_TARGET" --to "$GIT_COMMIT" --audience agent | tee review.md'
+      }
+    }
+  }
+  post { always { archiveArtifacts artifacts: 'review.md', allowEmptyArchive: true } }
+}

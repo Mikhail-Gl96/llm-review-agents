@@ -1,0 +1,35 @@
+# Авто AI-ревью на PR через open-code-review (ocr): CLI на раннере, результат — комментом.
+# Секреты: DEEPSEEK_KEY (или ключ вашего провайдера).
+# ВЕРИФИЦИРОВАТЬ: поддерживаемые --format/--audience — по докам ocr.
+name: open-code-review
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g @alibaba-group/open-code-review
+      - name: Настроить провайдера
+        env:
+          DEEPSEEK_KEY: ${{ secrets.DEEPSEEK_KEY }}
+        run: |
+          ocr config set llm.url https://api.deepseek.com/chat/completions
+          ocr config set llm.auth_token "$DEEPSEEK_KEY"
+          ocr config set llm.model deepseek-chat
+          ocr config set llm.use_anthropic false
+      - name: Ревью
+        run: ocr review --from "origin/${{ github.base_ref }}" --to "${{ github.event.pull_request.head.sha }}" --audience agent | tee review.md
+      - name: Комментарий в PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md

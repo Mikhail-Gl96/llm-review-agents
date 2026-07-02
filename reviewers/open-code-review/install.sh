@@ -163,6 +163,28 @@ OCR_ARGS=()
 [[ -n "$CONCURRENCY" ]] && OCR_ARGS+=("--concurrency" "$CONCURRENCY")
 [[ ${#EXTRA_FLAGS[@]} -gt 0 ]] && OCR_ARGS+=("${EXTRA_FLAGS[@]}")
 
+# ── spinner ──────────────────────────────────────────────────────────
+spinner() {
+  local pid=$1
+  local label="${2:-Ревью}"
+  local delay=0.15
+  local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  local rc=0
+  while kill -0 "$pid" 2>/dev/null; do
+    for ((i=0; i<${#chars}; i++)); do
+      printf "\r  %s %s..." "${chars:$i:1}" "$label"
+      sleep $delay
+    done
+  done
+  wait "$pid" 2>/dev/null || rc=$?
+  if [[ $rc -ne 0 ]]; then
+    printf "\r  ✗ %s упал (код %d)     \n" "$label" "$rc"
+  else
+    printf "\r  ✓ %s завершён     \n" "$label"
+  fi
+  return $rc
+}
+
 case $MODE in
   console)
     [[ "$PREVIEW" != true ]] && OCR_ARGS+=("--audience" "human")
@@ -173,7 +195,15 @@ case $MODE in
     JSON_FILE="${OUTPUT%.md}.json"
     OCR_ARGS+=("--format" "json")
     echo "▶ JSON-режим → $JSON_FILE"
-    ocr review "${OCR_ARGS[@]}" > "$JSON_FILE"
+    OCR_STDERR="$(mktemp)"
+    ocr review "${OCR_ARGS[@]}" > "$JSON_FILE" 2>"$OCR_STDERR" &
+    spinner "$!" "ocr review" || {
+      echo "✗ OCR завершился с ошибкой:" >&2
+      cat "$OCR_STDERR" >&2
+      rm -f "$OCR_STDERR" "$JSON_FILE"
+      exit 1
+    }
+    rm -f "$OCR_STDERR"
     echo "✓ Сохранено: $JSON_FILE"
     ;;
 
@@ -184,9 +214,17 @@ case $MODE in
       exit 1
     fi
     JSON_TMP="$(mktemp)"
+    OCR_STDERR="$(mktemp)"
     OCR_ARGS+=("--format" "json")
     echo "▶ Markdown-режим → $OUTPUT"
-    ocr review "${OCR_ARGS[@]}" > "$JSON_TMP"
+    ocr review "${OCR_ARGS[@]}" > "$JSON_TMP" 2>"$OCR_STDERR" &
+    spinner "$!" "ocr review" || {
+      echo "✗ OCR завершился с ошибкой:" >&2
+      cat "$OCR_STDERR" >&2
+      rm -f "$OCR_STDERR" "$JSON_TMP"
+      exit 1
+    }
+    rm -f "$OCR_STDERR"
     python3 "$CONVERTER" "$JSON_TMP" > "$OUTPUT"
     rm -f "$JSON_TMP"
     echo "✓ Сохранено: $OUTPUT"

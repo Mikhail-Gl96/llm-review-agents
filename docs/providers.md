@@ -33,7 +33,13 @@
 `glm-5.2` и `deepseek-reasoner` тратят часть токенов на «размышление». В полном ревью
 pr-agent выделяет достаточно; при своих тестах поднимай `max_tokens`. Отключить thinking:
 
-- **open-code-review:** `ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'`
+- **open-code-review:**
+  ```bash
+  # отключить
+  ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'
+  # включить обратно
+  ocr config delete llm.extra_body
+  ```
 - **pr-agent:** через параметры модели LiteLLM (см. доку провайдера).
 
 ## Как подключить к ревьюеру

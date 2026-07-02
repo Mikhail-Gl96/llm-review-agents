@@ -69,10 +69,16 @@ ocr config set llm.use_anthropic false
 ```
 
 Эндпоинты и id моделей других провайдеров — в [справочнике](../../docs/providers.md).
-Для «думающих» моделей (`glm-5.2`, `deepseek-v4-pro`) отключить thinking:
+Для «думающих» моделей (`glm-5.2`, `deepseek-v4-pro`) можно управлять thinking:
 
 ```bash
+# Отключить thinking (экономия токенов, быстрее)
 ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'
+
+# Включить обратно (глубже анализ, больше токенов)
+ocr config delete llm.extra_body
+# или сбросить:
+ocr config set llm.extra_body '{}'
 ```
 
 ## 4. Запуск ревью

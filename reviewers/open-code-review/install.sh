@@ -2,7 +2,8 @@
 # ---------------------------------------------------------------------------
 # install.sh — глобальная установка ocr-review (open-code-review wrapper)
 #
-# Ставит: Node (если нет) → ocr CLI → враппер + конвертер в /usr/local
+# Ставит: Node (если нет) → ocr CLI → враппер + конвертер
+# По умолчанию в ~/.local/ (без sudo). Если /usr/local доступен — туда.
 # После установки: ocr-review доступен из любого репозитория.
 #
 # Usage:
@@ -12,7 +13,12 @@
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-PREFIX="${PREFIX:-/usr/local}"
+# Выбираем префикс: /usr/local если пишется, иначе ~/.local
+if [[ -w /usr/local/bin ]] && [[ -w /usr/local/share ]] 2>/dev/null; then
+  PREFIX="${PREFIX:-/usr/local}"
+else
+  PREFIX="${PREFIX:-$HOME/.local}"
+fi
 BIN_DIR="$PREFIX/bin"
 SHARE_DIR="$PREFIX/share/ocr-review"
 WRAPPER="ocr-review"
@@ -106,7 +112,12 @@ cat > "$SHARE_DIR/$WRAPPER" << 'WRAPPER_EOF'
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-SHARE_DIR="/usr/local/share/ocr-review"
+# Определяем путь к конвертеру: лежит рядом с враппером или в share/ocr-review/
+if [[ -f "$(dirname "$0")/ocr-json-to-markdown.py" ]]; then
+  SHARE_DIR="$(cd "$(dirname "$0")" && pwd)"
+else
+  SHARE_DIR="$(cd "$(dirname "$0")/../share/ocr-review" 2>/dev/null && pwd || echo "$(dirname "$0")")"
+fi
 CONVERTER="$SHARE_DIR/ocr-json-to-markdown.py"
 
 MODE="console"
@@ -206,6 +217,7 @@ echo ""
 echo "═══════════════════════════════════════════"
 echo "  Установка завершена!"
 echo ""
+echo "  Префикс:  $PREFIX"
 echo "  Команда:  ocr-review"
 echo "  Режимы:   консоль | --markdown | --json"
 echo ""

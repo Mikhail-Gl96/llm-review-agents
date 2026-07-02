@@ -150,7 +150,7 @@ OCR_ARGS=()
 [[ -n "$COMMIT" ]]      && OCR_ARGS+=("--commit" "$COMMIT")
 [[ "$PREVIEW" == true ]] && OCR_ARGS+=("--preview")
 [[ -n "$CONCURRENCY" ]] && OCR_ARGS+=("--concurrency" "$CONCURRENCY")
-OCR_ARGS+=("${EXTRA_FLAGS[@]}")
+[[ ${#EXTRA_FLAGS[@]} -gt 0 ]] && OCR_ARGS+=("${EXTRA_FLAGS[@]}")
 
 case $MODE in
   console)

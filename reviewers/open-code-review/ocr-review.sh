@@ -82,8 +82,8 @@ OCR_ARGS=()
 [[ "$PREVIEW" == true ]] && OCR_ARGS+=("--preview")
 [[ -n "$CONCURRENCY" ]]  && OCR_ARGS+=("--concurrency" "$CONCURRENCY")
 
-# Добавляем оставшиеся флаги
-OCR_ARGS+=("${EXTRA_FLAGS[@]}")
+# Добавляем оставшиеся флаги (bash 3.2 compat: обходим set -u для пустого массива)
+[[ ${#EXTRA_FLAGS[@]} -gt 0 ]] && OCR_ARGS+=("${EXTRA_FLAGS[@]}")
 
 case $MODE in
   # ── консоль: ANSI-вывод в терминал ────────────────────────────────

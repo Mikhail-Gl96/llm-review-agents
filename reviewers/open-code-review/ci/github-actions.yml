@@ -29,9 +29,17 @@ jobs:
           ocr config set llm.use_anthropic false
       - name: Ревью
         run: |
-          echo '```diff' > review.md
-          ocr review --from "origin/${{ github.base_ref }}" --to "${{ github.event.pull_request.head.sha }}" --audience agent | sed 's/\x1b\[[0-9;]*m//g' >> review.md
-          echo '```' >> review.md
+          ocr review --from "origin/${{ github.base_ref }}" --to "${{ github.event.pull_request.head.sha }}" --audience agent | sed 's/\x1b\[[0-9;]*m//g' > raw.txt
+          SUMMARY=$(head -1 raw.txt)
+          {
+            echo '<details open>'
+            echo "<summary>🔍 ${SUMMARY}</summary>"
+            echo ''
+            echo '```diff'
+            tail -n +2 raw.txt
+            echo '```'
+            echo '</details>'
+          } > review.md
       - name: Комментарий в PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

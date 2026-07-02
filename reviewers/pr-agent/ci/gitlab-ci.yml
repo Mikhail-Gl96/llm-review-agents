@@ -1,0 +1,16 @@
+# Авто AI-ревью на MR через pr-agent. Переменные CI/CD (Settings → CI/CD → Variables, masked):
+#   DEEPSEEK_KEY, GITLAB_TOKEN (scope api, право комментить MR).
+# ВЕРИФИЦИРОВАТЬ: точный вызов CLI/имена env — по докам pr-agent (git_provider=gitlab).
+pr_agent_review:
+  image: python:3.12-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    CONFIG__GIT_PROVIDER: "gitlab"
+    CONFIG__MODEL: "deepseek/deepseek-chat"
+    CONFIG__FALLBACK_MODELS: '["deepseek/deepseek-chat"]'
+  script:
+    - pip install "pr-agent==0.36.1"
+    - export DEEPSEEK__KEY="$DEEPSEEK_KEY"
+    - export GITLAB__PERSONAL_ACCESS_TOKEN="$GITLAB_TOKEN"
+    - python -m pr_agent.cli --pr_url "${CI_PROJECT_URL}/-/merge_requests/${CI_MERGE_REQUEST_IID}" review

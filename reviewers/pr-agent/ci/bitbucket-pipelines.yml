@@ -1,0 +1,17 @@
+# Авто AI-ревью через pr-agent в Bitbucket Pipelines.
+# Repository variables (secured): DEEPSEEK_KEY, BITBUCKET_TOKEN (app password с правом на PR).
+# ВЕРИФИЦИРОВАТЬ: имена env для bitbucket-провайдера — по докам pr-agent.
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: pr-agent review
+          image: python:3.12-slim
+          script:
+            - pip install "pr-agent==0.36.1"
+            - export CONFIG__GIT_PROVIDER="bitbucket"
+            - export CONFIG__MODEL="deepseek/deepseek-chat"
+            - export CONFIG__FALLBACK_MODELS='["deepseek/deepseek-chat"]'
+            - export DEEPSEEK__KEY="$DEEPSEEK_KEY"
+            - export BITBUCKET__BEARER_TOKEN="$BITBUCKET_TOKEN"
+            - python -m pr_agent.cli --pr_url "https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID" review

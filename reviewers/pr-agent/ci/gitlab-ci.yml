@@ -7,8 +7,8 @@ pr_agent_review:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     CONFIG__GIT_PROVIDER: "gitlab"
-    CONFIG__MODEL: "deepseek/deepseek-chat"
-    CONFIG__FALLBACK_MODELS: '["deepseek/deepseek-chat"]'
+    CONFIG__MODEL: "deepseek/deepseek-v4-pro"
+    CONFIG__FALLBACK_MODELS: '["deepseek/deepseek-v4-pro"]'
   script:
     - pip install "pr-agent==0.36.1"
     - export DEEPSEEK__KEY="$DEEPSEEK_KEY"

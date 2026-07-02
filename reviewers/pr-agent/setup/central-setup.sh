@@ -50,8 +50,8 @@ if [ ! -f "$CFG" ]; then
 # export CONFIG__MAX_MODEL_TOKENS=1000000
 
 # --- DeepSeek (по умолчанию) ---
-export CONFIG__MODEL="deepseek/deepseek-chat"          # deepseek-chat/reasoner — без custom_model_max_tokens
-export CONFIG__FALLBACK_MODELS='["deepseek/deepseek-chat"]'
+export CONFIG__MODEL="deepseek/deepseek-v4-pro"          # deepseek-v4-pro/reasoner — без custom_model_max_tokens
+export CONFIG__FALLBACK_MODELS='["deepseek/deepseek-v4-pro"]'
 export DEEPSEEK__KEY="ВСТАВЬ_СЮДА_DEEPSEEK_KEY"
 
 # --- GLM (z.ai) ---

@@ -10,8 +10,8 @@ pipelines:
           script:
             - pip install "pr-agent==0.36.1"
             - export CONFIG__GIT_PROVIDER="bitbucket"
-            - export CONFIG__MODEL="deepseek/deepseek-chat"
-            - export CONFIG__FALLBACK_MODELS='["deepseek/deepseek-chat"]'
+            - export CONFIG__MODEL="deepseek/deepseek-v4-pro"
+            - export CONFIG__FALLBACK_MODELS='["deepseek/deepseek-v4-pro"]'
             - export DEEPSEEK__KEY="$DEEPSEEK_KEY"
             - export BITBUCKET__BEARER_TOKEN="$BITBUCKET_TOKEN"
             - python -m pr_agent.cli --pr_url "https://bitbucket.org/$BITBUCKET_WORKSPACE/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID" review

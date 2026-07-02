@@ -9,7 +9,7 @@
 
 | Провайдер | Эндпоинт | Модель | Нюансы |
 |---|---|---|---|
-| **DeepSeek** | `https://api.deepseek.com` (chat: `/chat/completions`) | `deepseek-chat` (дефолт) · `deepseek-reasoner` | `use_anthropic=false`; для pr-agent доп. настроек не нужно — самый простой старт |
+| **DeepSeek** | `https://api.deepseek.com` (chat: `/chat/completions`) | `deepseek-v4-pro` (дефолт) · `deepseek-reasoner` | `use_anthropic=false`; для pr-agent доп. настроек не нужно — самый простой старт |
 | **GLM (z.ai)** | Coding Plan: `https://api.z.ai/api/coding/paas/v4`<br>pay-as-you-go: `https://api.z.ai/api/paas/v4`<br>материк: `https://open.bigmodel.cn/api/paas/v4` | `glm-5.2` (reasoning) · `glm-5.2[1m]` — 1M контекст | thinking off; **не перепутать эндпоинт** (см. ниже); для pr-agent обязательны `custom_model_max_tokens` + `duplicate_examples` |
 | **LM Studio** (офлайн) | `http://localhost:1234/v1` | id загруженной модели | ключ — любая непустая строка (напр. `lm-studio`); сначала LM Studio → Developer → Start Server; для pr-agent обязательны `custom_model_max_tokens` + `duplicate_examples` |
 | **OpenAI** | `https://api.openai.com/v1` | `gpt-5.5` | `use_anthropic=false` |

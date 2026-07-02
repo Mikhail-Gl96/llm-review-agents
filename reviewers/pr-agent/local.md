@@ -35,7 +35,7 @@ DeepSeek: впиши ключ вместо `ВСТАВЬ_СЮДА_DEEPSEEK_KEY`.
 
 | Провайдер | Переменные |
 |---|---|
-| **DeepSeek** | `CONFIG__MODEL="deepseek/deepseek-chat"` · `DEEPSEEK__KEY="sk-..."` |
+| **DeepSeek** | `CONFIG__MODEL="deepseek/deepseek-v4-pro"` · `DEEPSEEK__KEY="sk-..."` |
 | **GLM (z.ai)** | `CONFIG__MODEL="openai/glm-5.2"` · `OPENAI__API_BASE=".../api/coding/paas/v4"` · `OPENAI__KEY` · `CONFIG__CUSTOM_MODEL_MAX_TOKENS` · `CONFIG__DUPLICATE_EXAMPLES=true` |
 | **LM Studio** | `CONFIG__MODEL="openai/<id-модели>"` · `OPENAI__API_BASE="http://localhost:1234/v1"` · `OPENAI__KEY="lm-studio"` · `CONFIG__CUSTOM_MODEL_MAX_TOKENS` · `CONFIG__DUPLICATE_EXAMPLES=true` |
 

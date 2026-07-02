@@ -29,7 +29,7 @@
 npm install -g @alibaba-group/open-code-review
 ocr config set llm.url https://api.deepseek.com/chat/completions
 ocr config set llm.auth_token sk-***
-ocr config set llm.model deepseek-chat
+ocr config set llm.model deepseek-v4-pro
 ocr review
 ```
 

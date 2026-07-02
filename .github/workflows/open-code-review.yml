@@ -3,8 +3,9 @@
 # ВЕРИФИЦИРОВАТЬ: поддерживаемые --format/--audience — по докам ocr.
 name: open-code-review
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
+  workflow_dispatch:  # ручной запуск из Actions UI
+  # pull_request:     # раскомментировать для авто-запуска на PR
+  #   types: [opened, reopened, synchronize]
 permissions:
   contents: read
   pull-requests: write

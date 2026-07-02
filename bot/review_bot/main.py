@@ -8,6 +8,7 @@ from review_bot.dedup import SeenEvents
 from review_bot.pipeline import handle_comment
 from review_bot.reviewers.ocr import OcrAdapter
 from review_bot.platforms.github import GitHubAdapter
+from review_bot.platforms.gitlab import GitLabAdapter
 
 
 def build_reviewers(settings: Settings) -> Registry:
@@ -28,7 +29,12 @@ def build_platforms(settings: Settings) -> dict:
             api_base=settings.github_api_base,
             bot_login=settings.github_bot_login,
         ),
-        # gitlab добавляется в Task 10
+        "gitlab": GitLabAdapter(
+            token=settings.gitlab_token,
+            webhook_secret=settings.gitlab_webhook_secret,
+            api_base=settings.gitlab_api_base,
+            bot_username=settings.gitlab_bot_username,
+        ),
     }
 
 
@@ -50,6 +56,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         payload = json.loads(body or b"{}")
         result = handle_comment(
             platform=platforms["github"], payload=payload, headers=headers,
+            raw_body=body, settings=settings, reviewers=reviewers, seen=seen)
+        return {"result": result}
+
+    @app.post("/webhook/gitlab")
+    async def gitlab_webhook(request: Request):
+        body = await request.body()
+        headers = {k.lower(): v for k, v in request.headers.items()}
+        payload = json.loads(body or b"{}")
+        result = handle_comment(
+            platform=platforms["gitlab"], payload=payload, headers=headers,
             raw_body=body, settings=settings, reviewers=reviewers, seen=seen)
         return {"result": result}
 

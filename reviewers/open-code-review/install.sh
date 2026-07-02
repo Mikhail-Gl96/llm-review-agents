@@ -111,6 +111,7 @@ cat > "$SHARE_DIR/$WRAPPER" << 'WRAPPER_EOF'
 #   ocr-review --concurrency 16          # параллельные файлы
 # ---------------------------------------------------------------------------
 set -euo pipefail
+export LANG="${LANG:-en_US.UTF-8}"  # Unicode-спиннер требует UTF-8
 
 # Определяем путь к конвертеру: лежит рядом с враппером или в share/ocr-review/
 if [[ -f "$(dirname "$0")/ocr-json-to-markdown.py" ]]; then
@@ -172,7 +173,7 @@ spinner() {
   local rc=0
   while kill -0 "$pid" 2>/dev/null; do
     for ((i=0; i<${#chars}; i++)); do
-      printf "\r  %s %s..." "${chars:$i:1}" "$label"
+      printf "\r  %s %s..." "${chars:$i:1}" "$label" || true
       sleep $delay
     done
   done

@@ -17,6 +17,7 @@
 #   ./ocr-review.sh --preview                 # показать, что попадёт в ревью (без LLM)
 # ---------------------------------------------------------------------------
 set -euo pipefail
+export LANG="${LANG:-en_US.UTF-8}"  # Unicode-спиннер требует UTF-8
 
 # ── repo root (2 уровня вверх от reviewers/open-code-review/) ──────────
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -94,7 +95,7 @@ spinner() {
   local rc=0
   while kill -0 "$pid" 2>/dev/null; do
     for ((i=0; i<${#chars}; i++)); do
-      printf "\r  %s %s..." "${chars:$i:1}" "$label"
+      printf "\r  %s %s..." "${chars:$i:1}" "$label" || true
       sleep $delay
     done
   done

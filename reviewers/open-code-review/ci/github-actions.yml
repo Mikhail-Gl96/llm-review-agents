@@ -28,7 +28,9 @@ jobs:
           ocr config set llm.model deepseek-v4-pro
           ocr config set llm.use_anthropic false
       - name: Ревью
-        run: ocr review --from "origin/${{ github.base_ref }}" --to "${{ github.event.pull_request.head.sha }}" --audience agent | tee review.md
+        run: |
+          ocr review --from "origin/${{ github.base_ref }}" --to "${{ github.event.pull_request.head.sha }}" --format json > review.json
+          python3 .github/scripts/ocr-json-to-markdown.py review.json "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha }}" > review.md
       - name: Комментарий в PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

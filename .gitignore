@@ -87,6 +87,7 @@ fabric.properties
 [Ll]ib64
 [Ll]ocal
 [Ss]cripts
+!.github/scripts/
 pyvenv.cfg
 .venv
 pip-selfcheck.json
@@ -305,3 +306,4 @@ cython_debug/
 #.idea/
 
 /draft-notes/
+review.md

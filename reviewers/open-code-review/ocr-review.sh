@@ -122,7 +122,7 @@ case $MODE in
   # ── json: сырой JSON в файл ───────────────────────────────────────
   json)
     JSON_FILE="${OUTPUT%.md}.json"
-    OCR_ARGS+=("--format" "json")
+    OCR_ARGS+=("--format" "json" "--audience" "agent")
     echo "▶ JSON-режим → $JSON_FILE"
     OCR_STDERR="$(mktemp)"
     ocr review "${OCR_ARGS[@]}" > "$JSON_FILE" 2>"$OCR_STDERR" &
@@ -133,6 +133,20 @@ case $MODE in
       exit 1
     }
     rm -f "$OCR_STDERR"
+
+    # Проверка: JSON-файл не пустой и валидный
+    if [[ ! -s "$JSON_FILE" ]]; then
+      echo "✗ JSON-файл пуст — ocr ничего не вывел в stdout." >&2
+      rm -f "$OCR_STDERR" "$JSON_FILE"
+      exit 1
+    fi
+    if ! python3 -c 'import json, sys; json.load(open(sys.argv[1]))' "$JSON_FILE" 2>/dev/null; then
+      echo "✗ JSON-файл повреждён. Содержимое (первые 200 байт):" >&2
+      head -c 200 "$JSON_FILE" >&2; echo >&2
+      rm -f "$OCR_STDERR" "$JSON_FILE"
+      exit 1
+    fi
+
     echo "✓ Сохранено: $JSON_FILE"
     ;;
 
@@ -140,7 +154,7 @@ case $MODE in
   markdown)
     JSON_TMP="$(mktemp)"
     OCR_STDERR="$(mktemp)"
-    OCR_ARGS+=("--format" "json")
+    OCR_ARGS+=("--format" "json" "--audience" "agent")
     echo "▶ Markdown-режим → $OUTPUT"
 
     if [[ ! -f "$CONVERTER" ]]; then
@@ -157,6 +171,20 @@ case $MODE in
       exit 1
     }
     rm -f "$OCR_STDERR"
+
+    # Проверка: JSON-файл не пустой и валидный
+    if [[ ! -s "$JSON_TMP" ]]; then
+      echo "✗ JSON-файл пуст — ocr ничего не вывел в stdout." >&2
+      rm -f "$JSON_TMP"
+      exit 1
+    fi
+    if ! python3 -c 'import json, sys; json.load(open(sys.argv[1]))' "$JSON_TMP" 2>/dev/null; then
+      echo "✗ JSON-файл повреждён. Содержимое (первые 200 байт):" >&2
+      head -c 200 "$JSON_TMP" >&2; echo >&2
+      rm -f "$JSON_TMP"
+      exit 1
+    fi
+
     python3 "$CONVERTER" "$JSON_TMP" > "$OUTPUT"
     rm -f "$JSON_TMP"
     echo "✓ Сохранено: $OUTPUT"

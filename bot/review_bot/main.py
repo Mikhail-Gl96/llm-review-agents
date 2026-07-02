@@ -14,7 +14,9 @@ def build_reviewers(settings: Settings) -> Registry:
     reg = Registry()
     if "ocr" in settings.enabled_engines:
         reg.register("ocr", OcrAdapter(timeout=settings.review_timeout))
-    # pr.agent регистрируется в Task 9
+    if "pr.agent" in settings.enabled_engines:
+        from review_bot.reviewers.pr_agent import PrAgentAdapter
+        reg.register("pr.agent", PrAgentAdapter(timeout=settings.review_timeout))
     return reg
 
 

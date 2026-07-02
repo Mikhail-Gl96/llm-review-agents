@@ -18,6 +18,15 @@ ocr version
 > Если нет прав на глобальный npm-каталог: `npm config set prefix ~/.npm-global` и добавь
 > `export PATH="$HOME/.npm-global/bin:$PATH"` в `~/.zshrc`.
 
+```bash
+brew install node
+npm config set prefix ~/.npm-global
+npm install -g @alibaba-group/open-code-review
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+ocr version
+```
+
 Альтернатива — [установка как плагин Claude Code](https://github.com/alibaba/open-code-review#option-2-install-as-a-claude-code-plugin).
 
 ## 2. Конфигурация провайдера (один раз)
@@ -28,12 +37,12 @@ ocr version
 ```bash
 ocr config set llm.url https://api.deepseek.com/chat/completions
 ocr config set llm.auth_token sk-***
-ocr config set llm.model deepseek-chat
+ocr config set llm.model deepseek-v4-pro
 ocr config set llm.use_anthropic false
 ```
 
 Эндпоинты и id моделей других провайдеров — в [справочнике](../../docs/providers.md).
-Для «думающих» моделей (`glm-5.2`, `deepseek-reasoner`) отключить thinking:
+Для «думающих» моделей (`glm-5.2`, `deepseek-v4-pro`) отключить thinking:
 
 ```bash
 ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'

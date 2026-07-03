@@ -14,5 +14,9 @@ COPY pyproject.toml ./
 COPY review_bot ./review_bot
 RUN pip install --no-cache-dir .
 
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
 EXPOSE 8000
 CMD ["uvicorn", "review_bot.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -53,10 +53,12 @@ pr_agent_review master review
 
 - [Справочник провайдеров](docs/providers.md)
 - [Как добавить нового ревьюера](docs/add-a-reviewer.md)
+- [Пример-кейс: GitLab CI + open-code-review](examples/gitlab-ci-ocr/README.md) — рабочий рецепт с граблями
 
 ## Структура
 
 ```
 reviewers/<name>/   # самодостаточный ревьюер: README, local.md, ci.md, setup/, ci/
+examples/           # готовые примеры-кейсы (напр. gitlab-ci-ocr)
 docs/               # общее: providers.md, add-a-reviewer.md
 ```

@@ -52,6 +52,23 @@ def test_post_comment():
         return httpx.Response(201, json={"id": 1})
     a = GitHubAdapter("t", "s", client=_client(handler))
     ctx = PRContext("github", "o/r", "o/r", 7, "main", "feature", "abc", "url", "author")
-    a.post_comment(ctx, "## Ревью")
+    nid = a.post_comment(ctx, "## Ревью")
+    assert nid == "1"
     assert seen["path"] == "/repos/o/r/issues/7/comments"
     assert seen["body"] == "## Ревью"
+
+
+def test_update_comment():
+    seen = {}
+
+    def handler(req):
+        seen["method"] = req.method
+        seen["path"] = req.url.path
+        seen["body"] = json.loads(req.content)["body"]
+        return httpx.Response(200, json={"id": 5})
+    a = GitHubAdapter("t", "s", client=_client(handler))
+    ctx = PRContext("github", "o/r", "o/r", 7, "main", "feature", "abc", "url", "author")
+    a.update_comment(ctx, "5", "обновлено")
+    assert seen["method"] == "PATCH"
+    assert seen["path"] == "/repos/o/r/issues/comments/5"
+    assert seen["body"] == "обновлено"

@@ -1,6 +1,9 @@
 import json
+import logging
 
 from fastapi import FastAPI, Request
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 from review_bot.config import Settings
 from review_bot.registry import Registry

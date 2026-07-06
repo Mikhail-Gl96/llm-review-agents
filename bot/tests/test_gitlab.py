@@ -75,6 +75,22 @@ def test_post_comment():
         seen["body"] = json.loads(req.content)["body"]
         return httpx.Response(201, json={"id": 1})
     ctx = PRContext("gitlab", "o/r", "12", 3, "main", "feature", "sha", "url", "alice")
-    _a(_client(handler)).post_comment(ctx, "## Ревью")
+    nid = _a(_client(handler)).post_comment(ctx, "## Ревью")
+    assert nid == "1"
     assert seen["path"] == "/api/v4/projects/12/merge_requests/3/notes"
     assert seen["body"] == "## Ревью"
+
+
+def test_update_comment():
+    seen = {}
+
+    def handler(req):
+        seen["method"] = req.method
+        seen["path"] = req.url.path
+        seen["body"] = json.loads(req.content)["body"]
+        return httpx.Response(200, json={"id": 7})
+    ctx = PRContext("gitlab", "o/r", "12", 3, "main", "feature", "sha", "url", "alice")
+    _a(_client(handler)).update_comment(ctx, "7", "обновлено")
+    assert seen["method"] == "PUT"
+    assert seen["path"] == "/api/v4/projects/12/merge_requests/3/notes/7"
+    assert seen["body"] == "обновлено"

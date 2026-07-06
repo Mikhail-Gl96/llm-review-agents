@@ -61,9 +61,16 @@ class GitLabAdapter:
             return False
         return int(mr.json().get("access_level", 0)) >= 30
 
-    def post_comment(self, ctx: PRContext, markdown: str) -> None:
+    def post_comment(self, ctx: PRContext, markdown: str) -> str:
         r = self._client.post(
             f"{self._api}/projects/{ctx.project_id}/merge_requests/{ctx.pr_number}/notes",
+            headers=self._auth(), json={"body": markdown})
+        r.raise_for_status()
+        return str(r.json().get("id", ""))
+
+    def update_comment(self, ctx: PRContext, comment_id: str, markdown: str) -> None:
+        r = self._client.put(
+            f"{self._api}/projects/{ctx.project_id}/merge_requests/{ctx.pr_number}/notes/{comment_id}",
             headers=self._auth(), json={"body": markdown})
         r.raise_for_status()
 

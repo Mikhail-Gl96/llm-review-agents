@@ -1,4 +1,5 @@
 import logging
+import re
 
 from review_bot.checkout import checkout_pr, cleanup
 from review_bot.router import resolve_engine
@@ -6,6 +7,18 @@ from review_bot.router import resolve_engine
 logger = logging.getLogger("review_bot.pipeline")
 
 _UNAUTHORIZED = "🔒 Ревью не запущено: у вас нет прав на этот репозиторий (или вы не в allowlist)."
+_ACK = "🔄 **Взял в работу** — гоняю `{engine}` по этому MR. Результат появится в этом комментарии через ~минуту."
+_ERROR = "❌ **Ошибка ревью** (`{engine}`):\n\n```\n{error}\n```"
+
+
+def _short_err(e: Exception) -> str:
+    """Краткое описание ошибки для коммента, с редактированием кредов в URL."""
+    parts = [f"{type(e).__name__}: {e}"]
+    stderr = getattr(e, "stderr", None)
+    if stderr:
+        parts.append(stderr if isinstance(stderr, str) else stderr.decode("utf-8", "replace"))
+    msg = re.sub(r"://[^/@\s]+@", "://***@", "\n".join(parts))  # не светим токен из URL
+    return msg.strip()[:1000]
 
 
 def handle_comment(*, platform, payload, headers, raw_body, settings, reviewers, seen) -> str:
@@ -35,11 +48,20 @@ def handle_comment(*, platform, payload, headers, raw_body, settings, reviewers,
         authorized = platform.check_authz(ctx, comment.author)
         if settings.allowlist:
             authorized = authorized and comment.author in settings.allowlist
-        if not authorized:
-            logger.info("[%s] unauthorized author=%s", platform.name, comment.author)
-            platform.post_comment(ctx, _UNAUTHORIZED)
-            return "unauthorized"
+    except Exception:
+        logger.exception("[%s] context/authz FAILED", platform.name)
+        return "error"
 
+    if not authorized:
+        logger.info("[%s] unauthorized author=%s", platform.name, comment.author)
+        platform.post_comment(ctx, _UNAUTHORIZED)
+        return "unauthorized"
+
+    # «взял в работу» — сразу, до долгого checkout+review; этот же коммент потом обновим
+    note_id = platform.post_comment(ctx, _ACK.format(engine=engine))
+    logger.info("[%s] ack note=%s; запускаю ревью", platform.name, note_id)
+
+    try:
         adapter = reviewers.get(engine)
         logger.info("[%s] checkout url=%s base=%s head=%s",
                     platform.name, ctx.clone_url, ctx.base_ref, ctx.head_ref)
@@ -48,11 +70,13 @@ def handle_comment(*, platform, payload, headers, raw_body, settings, reviewers,
             markdown = adapter.run(workdir, ctx.base_ref, ctx.head_ref)
         finally:
             cleanup(workdir)
-        logger.info("[%s] posting review (%d chars) to %s !%s",
-                    platform.name, len(markdown), ctx.repo, ctx.pr_number)
-        platform.post_comment(ctx, markdown)
-        logger.info("[%s] reviewed OK", platform.name)
+        platform.update_comment(ctx, note_id, markdown)
+        logger.info("[%s] reviewed OK (обновил note=%s)", platform.name, note_id)
         return "reviewed"
-    except Exception:
+    except Exception as e:
         logger.exception("[%s] review FAILED", platform.name)
+        try:
+            platform.update_comment(ctx, note_id, _ERROR.format(engine=engine, error=_short_err(e)))
+        except Exception:
+            logger.exception("[%s] не смог обновить коммент ошибкой", platform.name)
         return "error"

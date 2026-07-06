@@ -59,9 +59,16 @@ class GitHubAdapter:
             return False
         return r.json().get("permission") in {"admin", "write", "maintain"}
 
-    def post_comment(self, ctx: PRContext, markdown: str) -> None:
+    def post_comment(self, ctx: PRContext, markdown: str) -> str:
         r = self._client.post(
             f"{self._api}/repos/{ctx.repo}/issues/{ctx.pr_number}/comments",
+            headers=self._auth(), json={"body": markdown})
+        r.raise_for_status()
+        return str(r.json().get("id", ""))
+
+    def update_comment(self, ctx: PRContext, comment_id: str, markdown: str) -> None:
+        r = self._client.patch(
+            f"{self._api}/repos/{ctx.repo}/issues/comments/{comment_id}",
             headers=self._auth(), json={"body": markdown})
         r.raise_for_status()
 

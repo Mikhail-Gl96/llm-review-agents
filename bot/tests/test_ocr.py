@@ -4,7 +4,8 @@ from pathlib import Path
 from review_bot.reviewers.ocr import OcrAdapter
 
 SAMPLE = json.dumps({
-    "summary": {"files_reviewed": 1, "comments": 1, "elapsed": "5s"},
+    "summary": {"files_reviewed": 1, "comments": 1, "elapsed": "5s",
+                "total_tokens": 6829, "input_tokens": 6502, "output_tokens": 327},
     "comments": [{
         "path": "util.py",
         "content": "Logic bug: subtraction instead of addition.",
@@ -33,6 +34,7 @@ def test_run_builds_json_command_and_renders_markdown(monkeypatch):
     assert "origin/main" in calls["cmd"] and "feature" in calls["cmd"]
     # рендер — markdown с заголовком, диапазоном и ```diff (без ANSI)
     assert "### 🤖 AI-ревью" in out
+    assert "~6829 токенов" in out and "вход ~6502" in out and "выход ~327" in out
     assert "**строки 1–2**" in out
     assert "```diff" in out
     assert "-    return a - b" in out and "+    return a + b" in out

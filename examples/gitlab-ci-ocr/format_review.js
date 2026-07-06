@@ -24,9 +24,15 @@ function main() {
   const comments = Array.isArray(d.comments) ? d.comments : [];
   const out = [];
   out.push('### 🤖 AI-ревью кода (open-code-review)');
-  out.push('_Файлов: ' + (s.files_reviewed ?? '?') +
-           ' · замечаний: ' + (s.comments ?? comments.length) +
-           (s.elapsed ? ' · ' + s.elapsed : '') + '_');
+  let meta = 'Файлов: ' + (s.files_reviewed ?? '?') + ' · замечаний: ' + (s.comments ?? comments.length);
+  if (s.total_tokens) {
+    meta += ' · ~' + s.total_tokens + ' токенов';
+    if (s.input_tokens != null && s.output_tokens != null) {
+      meta += ' (вход ~' + s.input_tokens + ', выход ~' + s.output_tokens + ')';
+    }
+  }
+  if (s.elapsed) meta += ' · ' + s.elapsed;
+  out.push('_' + meta + '_');
 
   if (!comments.length) {
     out.push('\n✅ Замечаний нет.');

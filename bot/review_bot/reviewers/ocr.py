@@ -39,11 +39,16 @@ def _to_markdown(raw: str) -> str:
     summary = d.get("summary") or {}
     comments = d.get("comments") or []
     out = ["### 🤖 AI-ревью кода (open-code-review)"]
-    meta = (f"_Файлов: {summary.get('files_reviewed', '?')} · "
+    meta = (f"Файлов: {summary.get('files_reviewed', '?')} · "
             f"замечаний: {summary.get('comments', len(comments))}")
+    if summary.get("total_tokens"):
+        meta += f" · ~{summary['total_tokens']} токенов"
+        inp, outp = summary.get("input_tokens"), summary.get("output_tokens")
+        if inp is not None and outp is not None:
+            meta += f" (вход ~{inp}, выход ~{outp})"
     if summary.get("elapsed"):
         meta += f" · {summary['elapsed']}"
-    out.append(meta + "_")
+    out.append(f"_{meta}_")
 
     if not comments:
         out.append("\n✅ Замечаний нет.")
